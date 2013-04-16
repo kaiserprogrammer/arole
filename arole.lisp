@@ -1,5 +1,5 @@
 (defpackage :arole
-  (:use :cl :lisp-unit)
+  (:use :cl)
   (:export
    :memory-db
    :add-role
