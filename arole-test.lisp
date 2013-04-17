@@ -25,9 +25,9 @@
     (add-role :coder :parents (list :student))
     (add-user "john" :coder)
     (assert-equal (list :coder :student) (roles "john"))
-    (add-role :cowboy-coder :parents (list :manager :programmer))
+    (add-role :cowboy-coder :parents (list :manager :coder))
     (add-user "three" :cowboy-coder)
-    (assert-equal (list :cowboy-coder :manager :programmer) (roles "three"))))
+    (assert-equal (list :cowboy-coder :manager :coder :student) (roles "three"))))
 
 (let ((*print-failures* t)
       (*print-errors* t))
