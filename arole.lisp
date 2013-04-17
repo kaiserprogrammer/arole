@@ -12,9 +12,7 @@
 (defvar *role-db*)
 
 (defclass memory-db ()
-  ((children :initform (make-hash-table)
-             :accessor children)
-   (users :initform (make-hash-table :test 'equal)
+  ((users :initform (make-hash-table :test 'equal)
           :accessor users)
    (parents :initform (make-hash-table)
             :accessor parents)))
@@ -26,24 +24,23 @@
   (db-add-user id role db))
 
 (defun roles (id &key (db *role-db*))
-  (db-get-user id db))
+  (db-get-roles id db))
 
-(defmethod db-get-user (id (db memory-db))
+(defmethod db-get-roles (id (db memory-db))
   (let ((base-role (gethash id (users db))))
-    (list* base-role (gethash base-role (parents db)))))
+    (get-all-parents base-role db)))
+
+(defmethod get-all-parents (role (db memory-db))
+  (let ((parents (list role)))
+    (dolist (p (gethash role (parents db)))
+      (setf parents (append parents (get-all-parents p db))))
+    parents))
 
 (defmethod db-all-roles ((db memory-db))
-  (alexandria:hash-table-keys (children db)))
+  (alexandria:hash-table-keys (parents db)))
 
 (defmethod db-add-role (role parents (db memory-db))
-  (setf (gethash role (children db)) nil)
-  (dolist (p parents)
-    (pushnew role (gethash p (children db))))
-  (clrhash (parents db))
-  (maphash (lambda (parent children)
-             (dolist (child children)
-               (push parent (gethash child (parents db)))))
-           (children db)))
+  (setf (gethash role (parents db)) parents))
 
 (defmethod db-add-user (id role (db memory-db))
   (setf (gethash id (users db)) role))
